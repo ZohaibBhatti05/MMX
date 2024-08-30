@@ -1,0 +1,64 @@
+{
+  "info": {
+    "X_state": {
+      "address": 8260522,
+      "type": "|u1"
+    },
+    "chargeLevel": {
+      "address": 8260607,
+      "type": "|d1"
+    },
+    "chargeState": {
+      "address": 8260611,
+      "type": "|u1"
+    },
+    "enemy1_health": {
+      "address": 8261263,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy1_id": {
+      "address": 8261234,
+      "type": "|u1"
+    },
+    "enemy2_health": {
+      "address": 8261327,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy2_id": {
+      "address": 8261298,
+      "type": "|u1"
+    },
+    "enemy3_health": {
+      "address": 8261391,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy3_id": {
+      "address": 8261362,
+      "type": "|u1"
+    },
+    "enemy4_health": {
+      "address": 8261455,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy4_id": {
+      "address": 8261426,
+      "type": "|u1"
+    },
+    "health": {
+      "address": 8260559,
+      "type": "|i1"
+    },
+    "posX": {
+      "address": 8260525,
+      "type": "=u2"
+    },
+    "posY": {
+      "address": 8260528,
+      "type": "=u2"
+    }
+  }
+}
