@@ -5,3 +5,5 @@ Agent that can pretty consistently beat the intro stage included. Agent was trai
 (Note that training with the agent restarting the stage on death takes *ages*, I tested about 65 million frames before it can play well)
 
 Will update with other stages in near future.
+
+ROM not included for obvious reasons, place one as "rom.sfc" in MMX/game/
