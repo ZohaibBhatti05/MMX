@@ -1,4 +1,3 @@
-# MegamanX-PPO
 Proof of concept project for training PPO agents to play the Super Famicom game Megaman X.
 
 Agent that can pretty consistently beat the intro stage included. Agent was trained in one go for 20 million frames, with agents placed at different points in the intro stage. See demos for agent and video of that agent.
