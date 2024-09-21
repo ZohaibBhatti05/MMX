@@ -17,7 +17,7 @@ class MegamanXObservationWrapper(gymnasium.Wrapper):
     - Record episode length and cumulative reward
     """
 
-    def __init__(self, env, size = 128, framestack = 4, max_episode_steps = 18_000, stochastic_frame_skips = 2, frameskip_prob = 0.25):
+    def __init__(self, env, size = 128, framestack = 4, max_episode_steps = 18_000, stochastic_frame_skips = 4, frameskip_prob = 0.05):
 
         env = ResizeObservation(env, [size, size])
         env = GrayScaleObservation(env)
@@ -37,14 +37,14 @@ class StochasticFrameSkip(gymnasium.Wrapper):
         self.repeat_prob = repeat_prob
         self.rng = np.random.RandomState()
 
-        self.is_skipping = False
         self.current_action = None
-        self.skip_count = 0
         
 
     def step(self, action):
         if self.rng.random() > self.repeat_prob:    # dont repeat actions
-            return self.env.step(action)
+            state, reward, terminated, truncated, info = self.env.step(action)
+            info["frameskipped"] = False
+            return state, reward, terminated, truncated, info
         else:
             # repeat action repeat_count times
             total_reward = 0
@@ -53,7 +53,7 @@ class StochasticFrameSkip(gymnasium.Wrapper):
                 total_reward += reward
                 if terminated or truncated:
                     break   # halt inputs if done halfway through
-                    
+            info["frameskipped"] = True
             return state, total_reward, terminated, truncated, info
 
         

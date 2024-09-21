@@ -6,6 +6,6 @@
     "script": "lua:contest_reward"
   },
   "scripts": [
-    "script.lua"
+    "scripts/script.lua"
   ]
 }

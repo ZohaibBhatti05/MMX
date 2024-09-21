@@ -18,8 +18,10 @@ from torch.utils.tensorboard import SummaryWriter
 
 class PPO_Agent(Agent):
     """Class that trains a PPO agent on the supplied environments"""
-    def __init__(self, envs):
+    def __init__(self, envs, args):
         super().__init__(envs)
+
+        self.args = args
 
         # keep track of observation shape, action size, and keep a copy of the environments
         self.envs = envs
@@ -45,46 +47,25 @@ class PPO_Agent(Agent):
 
     def train(self):
 
-#region Params
-        total_timesteps = 15_000_000
-        self.steps_per_rollout = steps_per_rollout = 1024
-        minibatch_count = 32
-        num_envs = self.num_envs
-        num_epochs = 2
+        args = self.args
 
-        save_count = 20
+        print(f"num_iterations {args.num_iterations} :: batch_size {args.batch_size} :: minibatch_size {args.minibatch_size} :: iterations per save {args.iterations_per_save}")
 
-        self.num_iterations = num_iterations = total_timesteps // (steps_per_rollout * num_envs)
-        iterations_per_save = num_iterations // save_count
-        self.batch_size = steps_per_rollout * num_envs
-        self.minibatch_size = self.batch_size // minibatch_count
 
-        print(f"num_iterations {num_iterations} :: batch_size {self.batch_size} :: minibatch_size {self.minibatch_size} :: iterations per save {iterations_per_save}")
+        self.optimiser = optim.Adam(self.agent.parameters(), lr = args.alpha, eps = 1e-5)
 
-        self.display_rate = 6
-
-        self.alpha = 2.5e-4
-        self.gamma = 0.99
-        self.gae_lambda = 0.98
-        self.epsilon = 0.2
-
-        self.entropy_coefficient = 0.01
-        self.value_function_coefficient = 0.5
-        self.max_grad_norm = 0.5
-
-        self.optimiser = optim.Adam(self.agent.parameters(), lr = self.alpha, eps = 1e-5)
-
-#endregion
 
         try:
-
+            
+            # load pre-trained agent
             self.load()
 
             # init memory
-            self.init_memory(steps_per_rollout, num_envs)
+            self.init_memory(args.steps_per_rollout, args.num_envs)
 
             # init renderer
-            self.renderer = Renderer(self.envs, 4, 4)
+            if args.render_training:
+                self.renderer = Renderer(self.envs, 4, 4)
 
             # init summary writer
             self.writer = SummaryWriter()
@@ -97,18 +78,19 @@ class PPO_Agent(Agent):
             # -- reset environments and store s_0, d_0
             next_state = self.envs.reset()
             next_state = torch.tensor(next_state, device=device)
-            next_done = torch.zeros(num_envs, device=device)
+            next_done = torch.zeros(args.num_envs, device=device)
 
             self.state_memory[0] = next_state
             self.done_memory[0] = next_done
             # --
 
-            for iteration in range(1, num_iterations + 1):
+            for iteration in range(1, args.num_iterations + 1):
 
-                self.anneal_learning_rate(iteration)
+                if args.anneal_learning_rate:
+                    self.anneal_learning_rate(iteration)
 
-                for timestep in range(steps_per_rollout):
-                    self.global_step += num_envs
+                for timestep in range(args.steps_per_rollout):
+                    self.global_step += args.num_envs
                     next_state, next_done = self.rollout(timestep, next_state)
 
                 advantages, returns = self.compute_gae(next_state)
@@ -121,9 +103,9 @@ class PPO_Agent(Agent):
                 b_returns = returns.reshape(-1)
                 b_values = self.value_memory.reshape(-1)
 
-                b_indices = np.arange(self.batch_size)
+                b_indices = np.arange(args.batch_size)
 
-                for epoch in range(num_epochs):
+                for epoch in range(args.num_epochs):
                     np.random.shuffle(b_indices)
                     self.train_on_batch(b_indices, b_states, b_actions, b_logprobs, b_advantages, b_returns, b_values)
 
@@ -132,10 +114,10 @@ class PPO_Agent(Agent):
                 timehms = str(datetime.timedelta(seconds = training_time))
                 sps = self.global_step / training_time
 
-                print(f"SPS {sps:.2f}  :::  step {self.global_step}  :::  time {timehms}  :::  iteration {iteration} / {num_iterations}")
+                print(f"SPS {sps:.2f}  :::  step {self.global_step}  :::  time {timehms}  :::  iteration {iteration} / {args.num_iterations}")
 
                 # save every now and then
-                if iteration % iterations_per_save == 0:
+                if iteration % args.iterations_per_save == 0:
                     self.save()
                     print("saved agent!")
 
@@ -169,37 +151,50 @@ class PPO_Agent(Agent):
         #
 
         # render
-        if timestep % self.display_rate == 0:
+        if self.args.render_training and timestep % self.args.render_fpr == 0:
             self.renderer.render_direct(self.envs.get_images())
 
         # logging
-        if next_done.any():
-            for info in infos:
-                if "episode" in info:
-                    self.writer.add_scalar("charts/episodic_return", info["episode"]["r"], self.global_step)
-                    self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
-                    self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
-                    self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
-                    
+        # if next_done.any():
+        #     for info in infos:
+        #         if "episode" in info:
+        #             self.writer.add_scalar("charts/episodic_return", info["episode"]["r"], self.global_step)
+        #             self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
+        #             self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
+        #             self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
+
+        info = infos[0]
+        if "episode" in info:
+            self.writer.add_scalar("charts/episodic_return", info["episode"]["r"], self.global_step)
+            self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
+            self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
+            self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
+
+        
+        # count how many frames got frameskipped (not counted)
+        for info in infos:
+            if "frameskipped" in info and info["frameskipped"]:
+                self.global_step += 3 # unhardcode this later?
+
 
         return next_state, next_done
                 
     def compute_gae(self, next_state):
         with torch.no_grad():
-            self.value_memory[self.steps_per_rollout] = self.agent.get_value(next_state).reshape(1, -1)
+            self.value_memory[self.args.steps_per_rollout] = self.agent.get_value(next_state).reshape(1, -1)
             last_gae_lam = 0
             advantages = torch.zeros_like(self.value_memory, device=self.device)
 
-            for t in reversed(range(self.steps_per_rollout)):
-                delta = self.reward_memory[t] + (self.gamma * self.value_memory[t+1]) - self.value_memory[t]
-                advantages[t] = last_gae_lam = delta + (self.gamma * self.gae_lambda) * (1.0 - self.done_memory[t + 1]) * last_gae_lam
+            for t in reversed(range(self.args.steps_per_rollout)):
+                delta = self.reward_memory[t] + (self.args.gamma * self.value_memory[t+1]) - self.value_memory[t]
+                advantages[t] = last_gae_lam = delta + (self.args.gamma * self.args.gae_lambda) * (1.0 - self.done_memory[t + 1]) * last_gae_lam
             
             returns = advantages + self.value_memory
         return advantages, returns
 
     def train_on_batch(self, batch_indices, batch_states, batch_actions, batch_logprobs, batch_advantages, batch_returns, batch_values):
-        for start in range(0, self.batch_size, self.minibatch_size):
-            end = start + self.minibatch_size
+        for start in range(0, self.args.batch_size, self.args.minibatch_size):
+            end = start + self.args.minibatch_size
             minibatch_indices = batch_indices[start:end]
 
             # get minibatch
@@ -222,7 +217,7 @@ class PPO_Agent(Agent):
             # -L_CLIP
             policy_loss = torch.max(
                 -minibatch_advantages * ratio,
-                -minibatch_advantages * torch.clamp(ratio, 1 - self.epsilon, 1 + self.epsilon)
+                -minibatch_advantages * torch.clamp(ratio, 1 - self.args.epsilon, 1 + self.args.epsilon)
             ).mean()
 
             
@@ -233,11 +228,11 @@ class PPO_Agent(Agent):
             # H
             entropy_loss = entropy.mean()
             
-            loss_PPO = policy_loss - (self.entropy_coefficient * entropy_loss) + (self.value_function_coefficient * value_loss)
+            loss_PPO = policy_loss - (self.args.ent_coef * entropy_loss) + (self.args.vf_coef * value_loss)
 
             self.optimiser.zero_grad()
             loss_PPO.backward()
-            nn.utils.clip_grad_norm_(self.agent.parameters(), self.max_grad_norm)
+            nn.utils.clip_grad_norm_(self.agent.parameters(), self.args.max_grad_norm)
             self.optimiser.step()
 
         self.writer.add_scalar("losses/value_loss", value_loss.item(), self.global_step)
@@ -246,17 +241,22 @@ class PPO_Agent(Agent):
 
     # decrease learning rate over time
     def anneal_learning_rate(self, iteration):
-        frac = 1.0 - (iteration - 1.0) / self.num_iterations
-        lrnow = frac * self.alpha
+        frac = 1.0 - (iteration - 1.0) / self.args.num_iterations
+        lrnow = frac * self.args.alpha
         self.optimiser.param_groups[0]["lr"] = lrnow
+
+        self.writer.add_scalar("alpha", lrnow, self.global_step)
 
 
     def save(self):
         torch.save(self.agent.state_dict(), "agent.pt")
 
     def load(self):
-        # LOAD CHECKPOINT
-        self.agent.load_state_dict(torch.load("agent.pt", weights_only=True))
+        try:
+            # LOAD CHECKPOINT
+            self.agent.load_state_dict(torch.load("agent.pt", weights_only=True))
+        finally:
+            return
 
     def get_policy_action(self, state):        
         state = torch.tensor(state, device=self.device).unsqueeze(0)
