@@ -1,0 +1,5 @@
+source ~vretro/bin/activate
+
+python test_ppo.py --agent "folder/name"
+
+python train_ppo.py

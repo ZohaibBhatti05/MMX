@@ -3,4 +3,4 @@ import MMX
 from retro.scripts.playback_movie import main  #type: ignore
 
 
-main(["MegamanX-Snes-IntroStage1-000000.bk2"])
+main(["inputs.bk2"])

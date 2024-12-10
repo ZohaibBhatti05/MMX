@@ -21,13 +21,14 @@ def make_single_env(render_mode = "human"):
     return env
 
 
-def make_recording_env(state):
+def make_recording_env(state, scen):
     env = retro.make(
         game='MegamanX-Snes',
         inttype=retro.data.Integrations.CUSTOM_ONLY,
         render_mode="human",
-        record = '.',
+        record = '/test',
         state = "states/" + state + "1.state",
+        scenario = "scenarios/" + scen,
     )
     intro = (state == "IntroStage")
     env = MegamanXActionSpaceWrapper(env, simple=intro)
@@ -57,7 +58,7 @@ def make_mmx_env(
 
     # testing environment
     elif type == "test":
-        env = make_recording_env(state=state)
+        env = make_recording_env(state=state, scen=stage)
         return env
     
     else:
