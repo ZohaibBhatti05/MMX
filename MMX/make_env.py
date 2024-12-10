@@ -5,12 +5,12 @@ from MMX.wrappers import MegamanXObservationWrapper, MegamanXActionSpaceWrapper
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 
+# state name / scenario name for each valid input
 valid_stages = {
-    "intro_stage" : "IntroStage",
-    "sting_chameleon" : "StingChameleon",
-    "sc_boss" : "StingChameleon3",
+    "intro_stage" : ("IntroStage1", "intro_stage"),
+    "sting_chameleon" : ("StingChameleon1", "sting_chameleon"),
+    "sting_chameleon_boss" : ("StingChameleon3", "sting_chameleon"),
 }
-
 
 def make_single_env(render_mode = "human"):
     env = retro.make(
@@ -22,15 +22,19 @@ def make_single_env(render_mode = "human"):
 
 
 def make_recording_env(state, scen):
+
+    print(state)
+    print(scen)
+
     env = retro.make(
         game='MegamanX-Snes',
         inttype=retro.data.Integrations.CUSTOM_ONLY,
         render_mode="human",
-        record = '/test',
-        state = "states/" + state + "1.state",
+        record = True,
+        state = "states/" + state,
         scenario = "scenarios/" + scen,
     )
-    intro = (state == "IntroStage")
+    intro = (state == "IntroStage1")
     env = MegamanXActionSpaceWrapper(env, simple=intro)
     env = MegamanXObservationWrapper(env, frameskip_prob=0) # dont frameskip when testing agent
     env.num_envs = 1    # set this here so stable-retro doesnt warn about wrappers
@@ -46,19 +50,19 @@ def make_mmx_env(
 ):
     assert stage in valid_stages.keys(), "state not valid, pick one of: " + ", ".join(str(s) for s in valid_stages.keys())
 
-    state = valid_stages[stage]
+    (state, scen) = valid_stages[stage]
 
     # training environment
     if type == "train":
         assert num_envs > 0, "number of environments must be greater than 0!"
         envs = SubprocVecEnv(
-            [make_env_wrapped_func(state, checkpointed, i, stage) for i in range(num_envs)]
+            [make_env_wrapped_func(state, checkpointed, i, scen) for i in range(num_envs)]
         )
         return envs
 
     # testing environment
     elif type == "test":
-        env = make_recording_env(state=state, scen=stage)
+        env = make_recording_env(state=state, scen=scen)
         return env
     
     else:
@@ -68,16 +72,17 @@ def make_mmx_env(
 def make_env_wrapped_func(state, checkpointed, i, scen):
 
     def func():
-        # get which save state to load
-        state_index = i % 3 if checkpointed else 0
-        state_index += 1
-
-        # get the specific state for this environment
-        current_state = state + str(state_index)
-
-        # speecial case: training against just the boss
-        if state == "StingChameleon3":
+ 
+        # special case: training against just the boss
+        if state[-1] == '3':
             current_state = state
+        else:
+            # get which save state to load
+            state_index = i % 3 if checkpointed else 0
+            state_index += 1
+
+            # get the specific state for this environment
+            current_state = state[:-1] + str(state_index)
         
 
         # create the environment

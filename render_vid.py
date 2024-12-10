@@ -3,4 +3,4 @@ import MMX
 from retro.scripts.playback_movie import main  #type: ignore
 
 
-main(["inputs.bk2"])
+main(["out.bk2"])
