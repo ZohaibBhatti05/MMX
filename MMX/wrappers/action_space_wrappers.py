@@ -9,6 +9,56 @@ import numpy as np
 
 import retro #type: ignore
 
+simple_combos = [
+    [], # NOOP
+
+    ["LEFT"],
+    ["LEFT", "B"],
+    ["LEFT", "Y"],
+    ["LEFT", "B", "Y"],
+    
+    ["RIGHT"],
+    ["RIGHT", "B"],
+    ["RIGHT", "Y"],
+    ["RIGHT", "B", "Y"],
+
+    ["B"],
+    ["Y"],
+    ["B", "Y"],
+]
+
+complex_combos = [
+    [], # NOOP
+
+    ["LEFT"],
+    ["LEFT", "B"],
+    ["LEFT", "Y"],
+    ["LEFT", "B", "Y"],
+    
+    ["RIGHT"],
+    ["RIGHT", "B"],
+    ["RIGHT", "Y"],
+    ["RIGHT", "B", "Y"],
+
+    ["B"],
+    ["Y"],
+    ["B", "Y"],
+
+    ["LEFT", "A"],
+    ["LEFT", "B", "A"],
+    ["LEFT", "Y", "A"],
+    ["LEFT", "B", "Y", "A"],
+    
+    ["RIGHT", "A"],
+    ["RIGHT", "B", "A"],
+    ["RIGHT", "Y", "A"],
+    ["RIGHT", "B", "Y", "A"],
+
+    ["B", "UP"],   # used for getting out of ride armour
+
+    # dashing without holding a direction is functionally identical to dashing with direction so is omitted
+]
+
 class Discretizer(gym.ActionWrapper):
     """
     Wrap a gym environment and make it use discrete actions.
@@ -38,26 +88,16 @@ class MegamanXActionSpaceWrapper(Discretizer):
     Action space that only includes walking, jumping and shooting
     """
 
-    def __init__(self, env):
+    def __init__(self, env, simple = False):
+
+        if simple:
+            combos = simple_combos
+        else:
+            combos = complex_combos
+
         super().__init__(
             env = env,
-            combos = [
-                [], # NOOP
-
-                ["LEFT"],
-                ["LEFT", "B"],
-                ["LEFT", "Y"],
-                ["LEFT", "B", "Y"],
-                
-                ["RIGHT"],
-                ["RIGHT", "B"],
-                ["RIGHT", "Y"],
-                ["RIGHT", "B", "Y"],
-
-                ["B"],
-                ["Y"],
-                ["B", "Y"],
-            ]
+            combos = combos
         )
 
 __all__ = ["MegamanXActionWrapper"]

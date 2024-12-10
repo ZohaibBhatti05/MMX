@@ -1,11 +1,31 @@
+from dataclasses import dataclass
+import time
 import retro #type:ignore
+import tyro
 import MMX
 from MMX.agents import PPO_Agent
 
+from retro.scripts.playback_movie import main as render_video #type: ignore
+
+@dataclass
+class Args:
+    stage: str = "intro_stage"
+    """which stage to train on"""
+
+    agent: str = "agent"
+
 if __name__ == "__main__":
-    env = MMX.make_mmx_env("test", stage = "intro_stage")
+
+    args = tyro.cli(Args)
+
+    stage = args.stage
+    agent_name = args.agent
+
+    env = MMX.make_mmx_env("test", stage = stage)
     agent = PPO_Agent(env, None)
-    agent.load()
+
+
+    agent.load_from_name(agent_name + ".pt")
 
     state, _ = env.reset()
 

@@ -18,11 +18,11 @@ class PPONetwork(nn.Module):
             layer_init(nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1)),
             nn.ReLU(),
             nn.Flatten(),
-            layer_init(nn.Linear(64 * 7 * 7, 512)),
+            layer_init(nn.Linear(64 * 7 * 7, 1024)),
             nn.ReLU(),
         )
-        self.actor = layer_init(nn.Linear(512, action_size), std=0.01)
-        self.critic = layer_init(nn.Linear(512, 1), std=1)
+        self.actor = layer_init(nn.Linear(1024, action_size), std=0.01)
+        self.critic = layer_init(nn.Linear(1024, 1), std=1)
 
     def get_value(self, x):
         return self.critic(self.network(x / 255.0))

@@ -1,15 +1,15 @@
 {
   "info": {
+    "posX": {
+      "address": 8260525,
+      "type": "=u2"
+    },
+    "posY": {
+      "address": 8260528,
+      "type": "=u2"
+    },
     "X_state": {
       "address": 8260522,
-      "type": "|u1"
-    },
-    "chargeLevel": {
-      "address": 8260607,
-      "type": "|d1"
-    },
-    "chargeState": {
-      "address": 8260611,
       "type": "|u1"
     },
     "enemy1_health": {
@@ -52,13 +52,9 @@
       "address": 8260559,
       "type": "|i1"
     },
-    "posX": {
-      "address": 8260525,
-      "type": "=u2"
-    },
-    "posY": {
-      "address": 8260528,
-      "type": "=u2"
+    "num_shots": {
+      "address": 8260573,
+      "type": "|u1"
     }
   }
 }

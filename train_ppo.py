@@ -10,13 +10,13 @@ from MMX.agents import PPO_Agent
 @dataclass
 class Args:
     # render arguments
-    render_training: bool = True
+    render_training: bool = False
     """whether to display the training process"""
-    render_fpr: int = 10
+    render_fpr: int = 6
     """Number of frames to step between each render"""
 
     # algorithm specific arguments
-    total_timesteps: int = 20_000_000   # yeah this one takes a while unfortunately
+    total_timesteps: int = 50_000_000   # yeah this one takes a while unfortunately
     """total timesteps to train for"""
     num_envs: int = 16
     """the number of parallel game environments"""
@@ -57,6 +57,9 @@ class Args:
     iterations_per_save: int = 0
     """computed in runtime"""
 
+    stage: str = "intro_stage"
+    """which stage to train on"""
+
     seed: int = 1
 
 if __name__ == "__main__":
@@ -78,13 +81,13 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = True
 
-    # setup envs
-    envs = MMX.make_mmx_env(
-        stage = "intro_stage",
-        checkpointed = True,
-    )
-
     try:
+        # setup envs
+        envs = MMX.make_mmx_env(
+            stage = args.stage,
+            checkpointed = True,
+            num_envs = args.num_envs
+        )
         # setup agent
         agent = PPO_Agent(envs, args)
 

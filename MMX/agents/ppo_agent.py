@@ -121,10 +121,10 @@ class PPO_Agent(Agent):
                     self.save()
                     print("saved agent!")
 
+            self.save()
         finally:
             self.writer.close()
             self.renderer.close_display()
-            self.save()
             print("done")
 
 
@@ -257,9 +257,16 @@ class PPO_Agent(Agent):
             self.agent.load_state_dict(torch.load("agent.pt", weights_only=True))
         finally:
             return
+        
+    def load_from_name(self, agent_name):
+        try:
+            # LOAD CHECKPOINT
+            self.agent.load_state_dict(torch.load(agent_name, weights_only=True))
+        except:
+            print("failed to load agent")
 
     def get_policy_action(self, state):        
-        state = torch.tensor(state, device=self.device).unsqueeze(0)
+        state = torch.tensor(np.array(state), device=self.device).unsqueeze(0)
 
         # action logic
         with torch.no_grad():

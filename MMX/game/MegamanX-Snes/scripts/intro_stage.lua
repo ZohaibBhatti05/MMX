@@ -1,5 +1,5 @@
 -- done method
-function contest_done()
+function game_done()
 	local done = (is_dead() or is_grabbed_by_vile())
 
 	if is_grabbed_by_vile() then
@@ -10,7 +10,7 @@ function contest_done()
 end
 	
 -- reward function
-function contest_reward()
+function game_reward()
 	local reward = 0
 
 	-- reward for finishing
@@ -71,6 +71,9 @@ function contest_reward()
 	-- time punishment
 	reward = reward - time_punishment
 
+	-- punish shot count increasing
+	reward = reward + shot_count_bonus()
+
 	update_storage()
 
 	-- clip reward
@@ -102,6 +105,14 @@ function enemy_death_bonus()
 
 	return bonus
 
+end
+
+-- return a small punishment every time the number of bullets on screen incereases (to discourage shot spam)
+function shot_count_bonus()
+	if data.num_shots > prev_num_shots then
+		return shot_punishment
+	end
+	return 0
 end
 
 -- return true if X is dead lol
@@ -156,6 +167,8 @@ function update_storage()
 	enemy2_prev_health = data.enemy2_health
 	enemy3_prev_health = data.enemy3_health
 	enemy4_prev_health = data.enemy4_health
+
+	prev_num_shots = data.num_shots
 	
 	if data.posX > max_posX then
 		max_posX = data.posX
@@ -172,7 +185,7 @@ function update_storage()
 	end
 end
 
---------------- storage
+--------------- storage (common between files)
 
 prev_posX = 128
 prev_posY = 367
@@ -189,14 +202,14 @@ enemy2_prev_health = 0
 enemy3_prev_health = 0
 enemy4_prev_health = 0
 
---------------- parameters
+prev_num_shots = 0
 
-near_end = false
+--------------- parameters
 
 -- reward for furthest x position increasing
 progress_reward = 0.2
 
--- reward / punishment for gaining / losing height
+-- reward / punishment for gaining / losing height where relevant
 height_gain_reward = 0.05
 height_loss_punishment = 0.07
 
@@ -210,6 +223,9 @@ health_loss_punishment = 5
 -- reward for killing an enemy
 kill_reward = 5
 
+-- punishment for shooting
+shot_punishment = 0.02
+
 -- reward for beating level (this doesnt get clipped)
 clear_reward = 15
 
@@ -218,3 +234,7 @@ death_punishment = 15
 
 -- clip
 clip_reward = 15
+
+--------------- unique storage
+
+near_end = false	-- stores whether X is at the end of the intro stage (part where camera fixes)

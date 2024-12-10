@@ -1,0 +1,11 @@
+{
+  "done": {
+    "script": "lua:game_done"
+  },
+  "reward": {
+    "script": "lua:game_reward"
+  },
+  "scripts": [
+    "../scripts/intro_stage.lua"
+  ]
+}

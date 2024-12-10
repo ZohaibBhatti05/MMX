@@ -7,7 +7,8 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 
 valid_stages = {
     "intro_stage" : "IntroStage",
-    "sting_chameleon" : "StingChameleon"
+    "sting_chameleon" : "StingChameleon",
+    "sc_boss" : "StingChameleon3",
 }
 
 
@@ -21,9 +22,6 @@ def make_single_env(render_mode = "human"):
 
 
 def make_recording_env(state):
-
-    print("states/" + state + "1.state")
-
     env = retro.make(
         game='MegamanX-Snes',
         inttype=retro.data.Integrations.CUSTOM_ONLY,
@@ -31,8 +29,10 @@ def make_recording_env(state):
         record = '.',
         state = "states/" + state + "1.state",
     )
-    env = MegamanXActionSpaceWrapper(env)
-    env = MegamanXObservationWrapper(env)
+    intro = (state == "IntroStage")
+    env = MegamanXActionSpaceWrapper(env, simple=intro)
+    env = MegamanXObservationWrapper(env, frameskip_prob=0) # dont frameskip when testing agent
+    env.num_envs = 1    # set this here so stable-retro doesnt warn about wrappers
     return env
 
 
@@ -43,7 +43,7 @@ def make_mmx_env(
     checkpointed: bool = True,
     num_envs: int = 16,
 ):
-    assert stage in valid_stages.keys(), "state not valid, pick one of: " + " ".join(str(s) for s in valid_stages.keys())
+    assert stage in valid_stages.keys(), "state not valid, pick one of: " + ", ".join(str(s) for s in valid_stages.keys())
 
     state = valid_stages[stage]
 
@@ -51,7 +51,7 @@ def make_mmx_env(
     if type == "train":
         assert num_envs > 0, "number of environments must be greater than 0!"
         envs = SubprocVecEnv(
-            [make_env_wrapped_func(state, checkpointed, i) for i in range(num_envs)]
+            [make_env_wrapped_func(state, checkpointed, i, stage) for i in range(num_envs)]
         )
         return envs
 
@@ -64,7 +64,7 @@ def make_mmx_env(
         raise Exception("environment type must be one of: train, test")
 
 
-def make_env_wrapped_func(state, checkpointed, i):
+def make_env_wrapped_func(state, checkpointed, i, scen):
 
     def func():
         # get which save state to load
@@ -74,17 +74,23 @@ def make_env_wrapped_func(state, checkpointed, i):
         # get the specific state for this environment
         current_state = state + str(state_index)
 
+        # speecial case: training against just the boss
+        if state == "StingChameleon3":
+            current_state = state
+        
+
         # create the environment
         env = retro.make(
             game='MegamanX-Snes',
             inttype=retro.data.Integrations.CUSTOM_ONLY,
             render_mode="rgb_array",
-
             state = "states/" + current_state + ".state",
+            scenario = "scenarios/" + scen
         )
 
         # wrap environment
-        env = MegamanXActionSpaceWrapper(env)
+        intro = (scen == "intro_stage")
+        env = MegamanXActionSpaceWrapper(env, simple=intro)
         env = MegamanXObservationWrapper(env)
 
         return env
