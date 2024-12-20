@@ -1,15 +1,11 @@
 {
   "info": {
-    "posX": {
-      "address": 8260525,
-      "type": "=u2"
-    },
-    "posY": {
-      "address": 8260528,
-      "type": "=u2"
-    },
     "X_state": {
       "address": 8260522,
+      "type": "|u1"
+    },
+    "direction_facing": {
+      "address": 8260625,
       "type": "|u1"
     },
     "enemy1_health": {
@@ -55,6 +51,14 @@
     "num_shots": {
       "address": 8260573,
       "type": "|u1"
+    },
+    "posX": {
+      "address": 8260525,
+      "type": "=u2"
+    },
+    "posY": {
+      "address": 8260528,
+      "type": "=u2"
     }
   }
 }

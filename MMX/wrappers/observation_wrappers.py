@@ -4,6 +4,7 @@ Observation wrappers for use in backend training (basically anything that direct
 
 import gymnasium
 from gymnasium.wrappers import FrameStack, ResizeObservation, GrayScaleObservation, TimeLimit, RecordEpisodeStatistics
+from .memory_wrapper import MegamanXMemoryWrapper
 import numpy as np
 
 class MegamanXObservationWrapper(gymnasium.Wrapper):
@@ -17,11 +18,14 @@ class MegamanXObservationWrapper(gymnasium.Wrapper):
     - Record episode length and cumulative reward
     """
 
-    def __init__(self, env, size = 128, framestack = 4, max_episode_steps = 18_000, stochastic_frame_skips = 4, frameskip_prob = 0.05):
+    def __init__(self, env, size = 128, framestack = 4, max_episode_steps = 18_000, stochastic_frame_skips = 4, frameskip_prob = 0.05, image: bool = True):
 
-        env = ResizeObservation(env, [size, size])
-        env = GrayScaleObservation(env)
-        env = FrameStack(env, framestack, True)
+        if image:
+            env = ResizeObservation(env, [size, size])
+            env = GrayScaleObservation(env)
+            env = FrameStack(env, framestack, True)
+        else:
+            env = MegamanXMemoryWrapper(env)
         env = TimeLimit(env, max_episode_steps = max_episode_steps)
         env = RecordEpisodeStatistics(env, deque_size = 10)
         env = StochasticFrameSkip(env, stochastic_frame_skips, frameskip_prob)

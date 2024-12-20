@@ -1,0 +1,268 @@
+{
+  "info": {
+    "X_shot1_exists": {
+      "address": 8262184,
+      "type": "|u1"
+    },
+    "X_shot1_posX": {
+      "address": 8262189,
+      "type": "|u2"
+    },
+    "X_shot1_posY": {
+      "address": 8262192,
+      "type": "|u2"
+    },
+    "X_shot1_velX": {
+      "address": 8262210,
+      "type": "|i2"
+    },
+    "X_shot2_exists": {
+      "address": 8262248,
+      "type": "|u1"
+    },
+    "X_shot2_posX": {
+      "address": 8262253,
+      "type": "|u2"
+    },
+    "X_shot2_posY": {
+      "address": 8262256,
+      "type": "|u2"
+    },
+    "X_shot2_velX": {
+      "address": 8262274,
+      "type": "|i2"
+    },
+    "X_shot3_exists": {
+      "address": 8262312,
+      "type": "|u1"
+    },
+    "X_shot3_posX": {
+      "address": 8262317,
+      "type": "|u2"
+    },
+    "X_shot3_posY": {
+      "address": 8262320,
+      "type": "|u2"
+    },
+    "X_shot3_velX": {
+      "address": 8262338,
+      "type": "|i2"
+    },
+    "X_shot4_exists": {
+      "address": 8262376,
+      "type": "|u1"
+    },
+    "X_shot4_posX": {
+      "address": 8262381,
+      "type": "|u2"
+    },
+    "X_shot4_posY": {
+      "address": 8262384,
+      "type": "|u2"
+    },
+    "X_shot4_velX": {
+      "address": 8262402,
+      "type": "|i2"
+    },
+    "X_state": {
+      "address": 8260522,
+      "type": "|u1"
+    },
+    "direction_facing": {
+      "address": 8260625,
+      "type": "|u1"
+    },
+    "enemy1_exists": {
+      "address": 8262696,
+      "type": "|u1"
+    },
+    "enemy1_health": {
+      "address": 8261263,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy1_id": {
+      "address": 8261234,
+      "type": "|u1"
+    },
+    "enemy1_posX": {
+      "address": 8261229,
+      "type": "|u2"
+    },
+    "enemy1_posY": {
+      "address": 8261232,
+      "type": "|u2"
+    },
+    "enemy2_exists": {
+      "address": 8262760,
+      "type": "|u1"
+    },
+    "enemy2_health": {
+      "address": 8261327,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy2_id": {
+      "address": 8261298,
+      "type": "|u1"
+    },
+    "enemy2_posX": {
+      "address": 8261293,
+      "type": "|u2"
+    },
+    "enemy2_posY": {
+      "address": 8261296,
+      "type": "|u2"
+    },
+    "enemy3_exists": {
+      "address": 8262824,
+      "type": "|u1"
+    },
+    "enemy3_health": {
+      "address": 8261391,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy3_id": {
+      "address": 8261362,
+      "type": "|u1"
+    },
+    "enemy3_posX": {
+      "address": 8261357,
+      "type": "|u2"
+    },
+    "enemy3_posY": {
+      "address": 8261360,
+      "type": "|u2"
+    },
+    "enemy4_exists": {
+      "address": 8262888,
+      "type": "|u1"
+    },
+    "enemy4_health": {
+      "address": 8261455,
+      "mask": 63,
+      "type": "|u1"
+    },
+    "enemy4_id": {
+      "address": 8261426,
+      "type": "|u1"
+    },
+    "enemy4_posX": {
+      "address": 8261421,
+      "type": "|u2"
+    },
+    "enemy4_posY": {
+      "address": 8261424,
+      "type": "|u2"
+    },
+    "enemy_shot1_exists": {
+      "address": 8262696,
+      "type": "|u1"
+    },
+    "enemy_shot1_posX": {
+      "address": 8262701,
+      "type": "|u2"
+    },
+    "enemy_shot1_posY": {
+      "address": 8262704,
+      "type": "|u2"
+    },
+    "enemy_shot1_velX": {
+      "address": 8262722,
+      "type": "|i2"
+    },
+    "enemy_shot1_velY": {
+      "address": 8262724,
+      "type": "|i2"
+    },
+    "enemy_shot2_exists": {
+      "address": 8262760,
+      "type": "|u1"
+    },
+    "enemy_shot2_posX": {
+      "address": 8262765,
+      "type": "|u2"
+    },
+    "enemy_shot2_posY": {
+      "address": 8262768,
+      "type": "|u2"
+    },
+    "enemy_shot2_velX": {
+      "address": 8262786,
+      "type": "|i2"
+    },
+    "enemy_shot2_velY": {
+      "address": 8262788,
+      "type": "|i2"
+    },
+    "enemy_shot3_exists": {
+      "address": 8262824,
+      "type": "|u1"
+    },
+    "enemy_shot3_posX": {
+      "address": 8262829,
+      "type": "|u2"
+    },
+    "enemy_shot3_posY": {
+      "address": 8262832,
+      "type": "|u2"
+    },
+    "enemy_shot3_velX": {
+      "address": 8262850,
+      "type": "|i2"
+    },
+    "enemy_shot3_velY": {
+      "address": 8262852,
+      "type": "|i2"
+    },
+    "enemy_shot4_exists": {
+      "address": 8262888,
+      "type": "|u1"
+    },
+    "enemy_shot4_posX": {
+      "address": 8262893,
+      "type": "|u2"
+    },
+    "enemy_shot4_posY": {
+      "address": 8262896,
+      "type": "|u2"
+    },
+    "enemy_shot4_velX": {
+      "address": 8262914,
+      "type": "|i2"
+    },
+    "enemy_shot4_velY": {
+      "address": 8262916,
+      "type": "|i2"
+    },
+    "health": {
+      "address": 8260559,
+      "type": "|i1"
+    },
+    "num_shots": {
+      "address": 8260573,
+      "type": "|u1"
+    },
+    "posX": {
+      "address": 8260525,
+      "type": "=u2"
+    },
+    "posY": {
+      "address": 8260528,
+      "type": "=u2"
+    },
+    "velX": {
+      "address": 8260546,
+      "type": "|i2"
+    },
+    "velY": {
+      "address": 8260548,
+      "type": "|i2"
+    },
+    "wall_climb_state": {
+      "address": 8260614,
+      "type": "|u1"
+    }
+  }
+}

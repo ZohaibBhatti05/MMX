@@ -6,7 +6,8 @@ import MMX
 from .agent import Agent
 from MMX.utils.renderer import Renderer
 
-from .ppo import PPONetwork
+from .ppo_image import PPONetworkImage
+from .ppo_ram import PPONetworkRAM
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -26,13 +27,17 @@ class PPO_Agent(Agent):
         # keep track of observation shape, action size, and keep a copy of the environments
         self.envs = envs
         self.state_shape = envs.observation_space.shape
+
         self.action_size = envs.action_space.n
 
         # get device to use
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # init network and optimiser
-        self.agent = PPONetwork(self.action_size).to(self.device)
+        if (args.image):
+            self.agent = PPONetworkImage(self.action_size).to(self.device)
+        else:
+            self.agent = PPONetworkRAM(self.action_size).to(self.device)
 
 
     def init_memory(self, T, N):
@@ -77,7 +82,7 @@ class PPO_Agent(Agent):
 
             # -- reset environments and store s_0, d_0
             next_state = self.envs.reset()
-            next_state = torch.tensor(next_state, device=device)
+            next_state = torch.tensor(next_state, device=device, dtype=torch.float)
             next_done = torch.zeros(args.num_envs, device=device)
 
             self.state_memory[0] = next_state
@@ -136,7 +141,7 @@ class PPO_Agent(Agent):
         next_state, reward, next_done, infos = self.envs.step(action.cpu().numpy())
 
         # move state and done back to gpu
-        next_state = torch.tensor(next_state, device=self.device)
+        next_state = torch.tensor(next_state, device=self.device, dtype=torch.float)
         next_done = torch.tensor(next_done, device=self.device)
 
         # store data to memory

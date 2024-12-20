@@ -10,7 +10,7 @@ from MMX.agents import PPO_Agent
 @dataclass
 class Args:
     # render arguments
-    render_training: bool = False
+    render_training: bool = True
     """whether to display the training process"""
     render_fpr: int = 6
     """Number of frames to step between each render"""
@@ -57,8 +57,11 @@ class Args:
     iterations_per_save: int = 0
     """computed in runtime"""
 
-    stage: str = "intro_stage"
+    stage: str = "sting_chameleon"
     """which stage to train on"""
+
+    image: bool = True
+    """whether to train on image vs emulator memory"""
 
     seed: int = 1
 
@@ -86,7 +89,8 @@ if __name__ == "__main__":
         envs = MMX.make_mmx_env(
             stage = args.stage,
             checkpointed = True,
-            num_envs = args.num_envs
+            num_envs = args.num_envs,
+            image = args.image
         )
         # setup agent
         agent = PPO_Agent(envs, args)

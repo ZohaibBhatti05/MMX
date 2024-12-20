@@ -5,20 +5,15 @@ import torch.optim as optim
 from torch.distributions.categorical import Categorical
 
 # Neural Network function class
-class PPONetwork(nn.Module):
+class PPONetworkRAM(nn.Module):
     def __init__(self, action_size):
         super().__init__()
         self.network = nn.Sequential(
-            # layer_init(nn.Conv2d(in_channel = 4, out_channels = 32, kernel_size = 8, stride = 4)),    # old layer for atari
-            # nn.ReLU(),
-            layer_init(nn.Conv2d(in_channels = 4, out_channels = 32, kernel_size = 14, stride = 6)),  # layer for snes
+            layer_init(nn.Linear(46, 256)),
             nn.ReLU(),
-            layer_init(nn.Conv2d(in_channels = 32, out_channels = 64, kernel_size = 4, stride = 2)),
+            layer_init(nn.Linear(256, 512)),
             nn.ReLU(),
-            layer_init(nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size = 3, stride = 1)),
-            nn.ReLU(),
-            nn.Flatten(),
-            layer_init(nn.Linear(64 * 7 * 7, 512)),
+            layer_init(nn.Linear(512, 512)),
             nn.ReLU(),
         )
         self.actor = layer_init(nn.Linear(512, action_size), std=0.01)
