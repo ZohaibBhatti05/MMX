@@ -23,9 +23,14 @@ if __name__ == "__main__":
 
     s, _ = env.reset()
 
-    for i in range(100):
+    for i in range(10):
         a = env.action_space.sample()
         s, r, _, _, _ = env.step(a)
+
+        print(s[2989])
+        print(s[2990])
+
+        print(2**8 * s[2990] + s[2989]) # 2nd byte THEN first
 
 
     env.close()

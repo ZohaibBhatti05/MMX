@@ -9,23 +9,28 @@ from MMX.agents import PPO_Agent
 
 @dataclass
 class Args:
+    debug: bool = False
+    """whether to NOT create a tensorboard graph"""
+    load: bool = False
+    """whether to try to load an agent"""
+
     # render arguments
-    render_training: bool = True
+    render_training: bool = False
     """whether to display the training process"""
     render_fpr: int = 6
     """Number of frames to step between each render"""
 
     # algorithm specific arguments
-    total_timesteps: int = 50_000_000   # yeah this one takes a while unfortunately
+    total_timesteps: int = 300_000_000   # yeah this one takes a while unfortunately
     """total timesteps to train for"""
     num_envs: int = 16
     """the number of parallel game environments"""
-    num_checkpoints: int = 50
+    num_checkpoints: int = 200
     """number of times to save the agent whilst training"""
 
     steps_per_rollout: int = 1024
     """number of timesteps between policy rollouts"""
-    alpha: float = 2.5e-4
+    alpha: float = 1e-3
     """the initial learning rate of the optimizer"""
     gamma: float = 0.99
     """the discount factor gamma"""

@@ -192,11 +192,11 @@ height_gain_reward = 0.05
 height_loss_punishment = 0.07
 
 -- general punishment
-time_punishment = 0.05
+time_punishment = 0.2
 
 -- reward / punishment for gaining / losing health
 health_gain_reward = 1
-health_loss_punishment = 5
+health_loss_punishment = 1.5
 
 -- reward for killing an enemy
 kill_reward = 5
@@ -205,7 +205,7 @@ kill_reward = 5
 shot_punishment = 0.01
 
 -- rewards for dealing 1 or >1 damage to the boss
-boss_low_damage_reward = 15
+boss_low_damage_reward = 10
 boss_high_damage_reward = 15
 
 -- reward for beating level (this doesnt get clipped)

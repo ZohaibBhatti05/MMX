@@ -17,6 +17,10 @@ class Renderer:
         self.num_envs = envs.num_envs
         self.envs_per_row = envs_per_row
         self.envs_per_col = envs_per_col
+
+        print(self.num_envs)
+        print(self.envs_per_col)
+        print(self.envs_per_row)
         
         self.env_width = obs_x * scale
         self.env_height = obs_y * scale
@@ -38,6 +42,9 @@ class Renderer:
 
         for i in range(self.envs_per_row):
             for j in range(self.envs_per_col):
+
+                print(i)
+                print(j)
 
                 # get frame for one environment
                 frame = pygame.surfarray.make_surface(data[(i * self.envs_per_row) + j])
@@ -65,13 +72,14 @@ class Renderer:
 
         data = np.swapaxes(data, 1, 2)
 
-        for i in range(self.envs_per_row):
-            for j in range(self.envs_per_col):
+        for i in range(self.envs_per_col):
+            for j in range(self.envs_per_row):
+
 
                 # get frame for one environment
                 frame = pygame.surfarray.make_surface(data[(i * self.envs_per_row) + j])
-                x = i * self.env_width
-                y = j * self.env_height
+                x = j * self.env_width
+                y = i * self.env_height
                 
                 # blit it to temp surface
                 self.screen.blit(frame, (x, y))

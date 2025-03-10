@@ -4,10 +4,6 @@
       "address": 8260522,
       "type": "|u1"
     },
-    "direction_facing": {
-      "address": 8260625,
-      "type": "|u1"
-    },
     "enemy1_health": {
       "address": 8261263,
       "mask": 63,

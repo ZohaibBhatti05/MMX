@@ -1,12 +1,13 @@
 import gymnasium
 import numpy as np
+from numba import njit
 
 
 class MegamanXMemoryWrapper(gymnasium.Wrapper):
     def __init__(self, env):
         gymnasium.Wrapper.__init__(self, env)
-        self.observation_space = gymnasium.spaces.Box(0, 255, (46,))
-        self.shape = (46,)
+        self.observation_space = gymnasium.spaces.Box(0, 255, (68,))
+        self.shape = (68,)
 
     def reset(self, seed : int = None, options = None):
         _, info = self.env.reset()
@@ -14,129 +15,83 @@ class MegamanXMemoryWrapper(gymnasium.Wrapper):
     
     def step(self, action):
         
-        _, reward, terminated, truncated, info = self.env.step(action)
+        ram, reward, terminated, truncated, info = self.env.step(action)
 
-        # get all relevant variables from info
-        data = self.memory(info)
+        data = extract_memory(ram)
+
+        # data = np.zeros((68,))
+
         return data, reward, terminated, truncated, info
 
-    # get all relevant variables from info manually
-    def memory(self, old_info):
-        info = old_info.copy()
+@njit
+def two_byte(ram, index):
+    offset = 256
+    byte1_index = offset + 1
+    return offset * ram[byte1_index] + ram[index]
 
-#region remove irrelevant data from dictionary
+@njit
+def extract_memory(ram):
+        
+    num_entities = 8
 
-        del info["num_shots"]
-        del info["X_state"]
-        del info["health"]
+    # addresses
+    # i_health = 0x0bcf
 
-        info.pop("furthest_position", None)
-        info.pop("beat_stage", None)
-        info.pop("damage_taken", None)
+    i_X_posX = 0x0bad
+    i_X_posY = 0x0bb0
 
-        # EXPERIMENTAL: IGNORING ENEMY TYPE
-        del info["enemy1_id"]
-        del info["enemy2_id"]
-        del info["enemy3_id"]
-        del info["enemy4_id"]
+    i_X_velX = 0x0bc2
+    i_X_velY = 0x0bc4
 
-#endregion
+    # i_X_shot_data = 0x1228
+    i_enemy_data = 0x0e68
+    i_enemy_shot_data = 0x1428
 
-#region format all useless data as 0
+    i_offset_posX = 0x5
+    i_offset_posY = 0x8
+    i_offset_velX = 0x1a
+    i_offset_velY = 0x1c
 
-        # Player shots
-        if info["X_shot1_exists"] < 1.0:
-            info["X_shot1_posX"] = 0.0
-            info["X_shot1_posY"] = 0.0
-            info["X_shot1_velX"] = 0.0
-        if info["X_shot2_exists"] < 1.0:
-            info["X_shot2_posX"] = 0.0
-            info["X_shot2_posY"] = 0.0
-            info["X_shot2_velX"] = 0.0
-        if info["X_shot3_exists"] < 1.0:
-            info["X_shot3_posX"] = 0.0
-            info["X_shot3_posY"] = 0.0
-            info["X_shot3_velX"] = 0.0
-        if info["X_shot4_exists"] < 1.0:
-            info["X_shot4_posX"] = 0.0
-            info["X_shot4_posY"] = 0.0
-            info["X_shot4_velX"] = 0.0
+#region extracting from memory
+    data = np.empty((68,))
 
-        # Enemy shots
-        if info["enemy_shot1_exists"] < 1.0:
-            info["enemy_shot1_posX"] = 0.0
-            info["enemy_shot1_posY"] = 0.0
-            info["enemy_shot1_velX"] = 0.0
-            info["enemy_shot1_velY"] = 0.0
-        if info["enemy_shot2_exists"] < 1.0:
-            info["enemy_shot2_posX"] = 0.0
-            info["enemy_shot2_posY"] = 0.0
-            info["enemy_shot2_velX"] = 0.0
-            info["enemy_shot2_velY"] = 0.0
-        if info["enemy_shot3_exists"] < 1.0:
-            info["enemy_shot3_posX"] = 0.0
-            info["enemy_shot3_posY"] = 0.0
-            info["enemy_shot3_velX"] = 0.0
-            info["enemy_shot3_velY"] = 0.0
-        if info["enemy_shot4_exists"] < 1.0:
-            info["enemy_shot4_posX"] = 0.0
-            info["enemy_shot4_posY"] = 0.0
-            info["enemy_shot4_velX"] = 0.0
-            info["enemy_shot4_velY"] = 0.0
+    # player
+    data[0] = two_byte(ram, i_X_posX)
+    data[1] = two_byte(ram, i_X_posY)
+    data[2] = two_byte(ram, i_X_velX)
+    data[3] = two_byte(ram, i_X_velY)
 
-        # Enemies
-        if info["enemy1_exists"] < 1.0:
-            info["enemy1_posX"] = 0.0
-            info["enemy1_posY"] = 0.0
-            info["enemy1_health"] = 0.0
-        if info["enemy2_exists"] < 1.0:
-            info["enemy2_posX"] = 0.0
-            info["enemy2_posY"] = 0.0
-            info["enemy2_health"] = 0.0
-        if info["enemy3_exists"] < 1.0:
-            info["enemy3_posX"] = 0.0
-            info["enemy3_posY"] = 0.0
-            info["enemy3_health"] = 0.0
-        if info["enemy4_exists"] < 1.0:
-            info["enemy4_posX"] = 0.0
-            info["enemy4_posY"] = 0.0
-            info["enemy4_health"] = 0.0
+    index = 4
 
-        # remove "exists" vals from dictionary
-        del info["X_shot1_exists"]
-        del info["X_shot2_exists"]
-        del info["X_shot3_exists"]
-        del info["X_shot4_exists"]
-        del info["enemy_shot1_exists"]
-        del info["enemy_shot2_exists"]
-        del info["enemy_shot3_exists"]
-        del info["enemy_shot4_exists"]
-        del info["enemy1_exists"]
-        del info["enemy2_exists"]
-        del info["enemy3_exists"]
-        del info["enemy4_exists"]
+    # enemy data
+    for i in range(num_entities):
+        entity_offset = 64 * i
 
-#endregion
-
-#region reformat certain variables
-
-        # Player direction
-        if info["direction_facing"] > 0.0:
-            info["direction_facing"] = 1.0
+        # enemy i
+        if ram[entity_offset + i_enemy_data]:
+            data[index] = two_byte(ram, entity_offset + i_enemy_data + i_offset_posX)
+            data[index + 1] = two_byte(ram, entity_offset + i_enemy_data + i_offset_posY)
+            data[index + 2] = two_byte(ram, entity_offset + i_enemy_data + i_offset_velX)
+            data[index + 3] = two_byte(ram, entity_offset + i_enemy_data + i_offset_velY)
         else:
-            info["direction_facing"] = -1.0
+            data[index] = 0
+            data[index + 1] = 0
+            data[index + 2] = 0
+            data[index + 3] = 0
 
-        # Wall climb state
-        if info["wall_climb_state"] == 1:   # right wall climb
-            info["wall_climb_state"] = 1.0
-        elif info["wall_climb_state"] == 2: # left wall climb
-            info["wall_climb_state"] = -1.0
+        # enemy shot i 
+        if ram[entity_offset + i_enemy_shot_data]:
+            data[index + 4] = two_byte(ram, entity_offset + i_enemy_shot_data + i_offset_posX)
+            data[index + 5] = two_byte(ram, entity_offset + i_enemy_shot_data + i_offset_posY)
+            data[index + 6] = two_byte(ram, entity_offset + i_enemy_shot_data + i_offset_velX)
+            data[index + 7] = two_byte(ram, entity_offset + i_enemy_shot_data + i_offset_velY)
         else:
-            info["wall_climb_state"] = 0.0
-
+            data[index + 4] = 0
+            data[index + 5] = 0
+            data[index + 6] = 0
+            data[index + 7] = 0
+        
+        index += 8
 #endregion
-
-        data = np.fromiter(info.values(), dtype=float)
-
-        return data
+    return data
         

@@ -9,7 +9,7 @@ class PPONetworkRAM(nn.Module):
     def __init__(self, action_size):
         super().__init__()
         self.network = nn.Sequential(
-            layer_init(nn.Linear(46, 256)),
+            layer_init(nn.Linear(68, 256)),
             nn.ReLU(),
             layer_init(nn.Linear(256, 512)),
             nn.ReLU(),

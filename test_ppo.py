@@ -9,10 +9,12 @@ from retro.scripts.playback_movie import main as render_video #type: ignore
 
 @dataclass
 class Args:
-    stage: str = "intro_stage"
+    stage: str = "sting_chameleon"
     """which stage to train on"""
 
     agent: str = "agent"
+
+    image: bool = True
 
 if __name__ == "__main__":
 
@@ -22,7 +24,7 @@ if __name__ == "__main__":
     agent_name = args.agent
 
     env = MMX.make_mmx_env("test", stage = stage)
-    agent = PPO_Agent(env, None)
+    agent = PPO_Agent(env, args)
 
 
     agent.load_from_name(agent_name + ".pt")
@@ -39,6 +41,6 @@ if __name__ == "__main__":
             added += 1
 
         if added == 200:
-            break
+           break
     
     env.close()

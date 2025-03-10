@@ -63,7 +63,8 @@ class PPO_Agent(Agent):
         try:
             
             # load pre-trained agent
-            self.load()
+            if args.load:
+                self.load()
 
             # init memory
             self.init_memory(args.steps_per_rollout, args.num_envs)
@@ -73,7 +74,8 @@ class PPO_Agent(Agent):
                 self.renderer = Renderer(self.envs, 4, 4)
 
             # init summary writer
-            self.writer = SummaryWriter()
+            if not args.debug:
+                self.writer = SummaryWriter()
             
             device = self.device
             self.global_step = 0
@@ -122,14 +124,16 @@ class PPO_Agent(Agent):
                 print(f"SPS {sps:.2f}  :::  step {self.global_step}  :::  time {timehms}  :::  iteration {iteration} / {args.num_iterations}")
 
                 # save every now and then
-                if iteration % args.iterations_per_save == 0:
+                if not self.args.debug and iteration % args.iterations_per_save == 0:
                     self.save()
                     print("saved agent!")
 
         finally:
-            self.writer.close()
-            self.renderer.close_display()
-            self.save()
+            if not args.debug:
+                self.writer.close()
+                self.save()
+            if self.args.render_training:
+                self.renderer.close_display()
             print("done")
 
     def rollout(self, timestep, next_state):
@@ -165,13 +169,14 @@ class PPO_Agent(Agent):
         #             self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
         #             self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
         #             self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
-
         info = infos[0]
-        if "episode" in info:
-            self.writer.add_scalar("charts/episodic_return", info["episode"]["r"], self.global_step)
-            self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
-            self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
-            self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
+
+        if not self.args.debug:
+            if "episode" in info:
+                self.writer.add_scalar("charts/episodic_return", info["episode"]["r"], self.global_step)
+                self.writer.add_scalar("charts/episodic_length", info["episode"]["l"], self.global_step)
+                self.writer.add_scalar("charts/episodic_damage_taken", info["damage_taken"], self.global_step)
+                self.writer.add_scalar("charts/episodic_progress", info["furthest_position"], self.global_step)
 
         
         # count how many frames got frameskipped (not counted)
@@ -238,9 +243,10 @@ class PPO_Agent(Agent):
             nn.utils.clip_grad_norm_(self.agent.parameters(), self.args.max_grad_norm)
             self.optimiser.step()
 
-        self.writer.add_scalar("losses/value_loss", value_loss.item(), self.global_step)
-        self.writer.add_scalar("losses/policy_loss", -policy_loss.item(), self.global_step)
-        self.writer.add_scalar("losses/entropy", entropy_loss.item(), self.global_step)
+        if not self.args.debug:
+            self.writer.add_scalar("losses/value_loss", value_loss.item(), self.global_step)
+            self.writer.add_scalar("losses/policy_loss", -policy_loss.item(), self.global_step)
+            self.writer.add_scalar("losses/entropy", entropy_loss.item(), self.global_step)
 
     # decrease learning rate over time
     def anneal_learning_rate(self, iteration):
@@ -248,7 +254,8 @@ class PPO_Agent(Agent):
         lrnow = frac * self.args.alpha
         self.optimiser.param_groups[0]["lr"] = lrnow
 
-        self.writer.add_scalar("alpha", lrnow, self.global_step)
+        if not self.args.debug:
+            self.writer.add_scalar("alpha", lrnow, self.global_step)
 
 
     def save(self):
