@@ -5,7 +5,7 @@ See demos for agent and video of that agent.
 
 (Note that training with the agent restarting the stage on death takes *ages*, I tested about 65 million frames before it can play well)
 
-Will update with other stages in near future.
+Might update with other stages in future?
 
 ROM not included for obvious reasons, place one as "rom.sfc" in MMX/game/
 
@@ -14,7 +14,7 @@ USAGE:
 To train an agent:
 
 e.g
-> python train_ppo.py --total_timeteps 1_000_000 --stage "intro_stage" --render_training
+> python train_ppo.py --total_timesteps 1_000_000 --stage "intro_stage" --render_training
 
 To test an agent:
 
