@@ -21,7 +21,7 @@ To test an agent:
 > python test_ppo.py --stage "intro_stage" --agent "path/name"
 (Without .pt)
 
-^ this will output a file in root ending in ".bk2". Rename to "out.bk2" and run:
+^ this will output a file in root ending in ".bk2" (This is a replay of the outputs, think TAS). Rename to "out.bk2" and run:
 > python render_vid.py
 
 to get an mp4 of the test run
